@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ./",
     "pre-commit": "npm t",
-    "posttest": "npm run lint"
+    "posttest": "npm run lint",
+    "create-db": "psql -f ./db/setup.sql",
+    "knex:init": "knex init"
   },
   "repository": {
     "type": "git",
