@@ -1,5 +1,5 @@
-const { articleData, userData, commentData, topicData } = require('../db/data/development-data');
-const { createRef, formatArticle, formatComments } = require('../utils');
+const { articleData, userData, commentData, topicData } = require('../db/data/');
+const { createRef, formatArticle, formatComments } = require('../db/utils');
 
 
 exports.seed = function(knex, Promise) {
