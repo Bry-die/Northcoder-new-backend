@@ -26,6 +26,25 @@ describe('/', () => {
         expect(topics[0]).to.have.all.keys(['slug', 'description']);
         expect(topics[0].slug).to.equal('mitch');
       }));
+      it('POST returns a status 201 and the object that was sent', () => request.post(url).send({ slug: 'carrots', description: 'orange and delicious' }).expect(201).then(({ body: { topic } }) => {
+        expect(topic).to.be.an('Object');
+        expect(topic).to.have.all.keys(['slug', 'description']);
+        expect(topic.slug).to.equal('carrots');
+      }));
+      it('if the POST request has a bad format returns a 400 and error msg', () => request.post(url).send({ balls: 'balls are bouncy' }).expect(400).then(({ body }) => {
+        expect(body.msg).to.equal('bad request malformed body...');
+      }));
+      it('if the POST request is valid but the slug is taken return 422 and error message', () => request.post(url).send({ slug: 'mitch', description: 'great guy' }).expect(422).then(({ body }) => {
+        expect(body.msg).to.equal('inprocessable entity...');
+      }));
+      // it('all incorrect methods respond with a 405', () => {
+      //   const invalid = ['delete', 'put', 'patch'];
+      //   return Promise.all(invalid.map((method) => {
+      //     request[method][url].expect(405).then(({ body }) => {
+      //       expect(body.msg).to.equal('method not allowed...');
+      //     });
+      //   }));
+      // });
       describe('/:topics', () => {
         describe('/articles', () => {
           const url1 = '/api/topics/cats/articles';

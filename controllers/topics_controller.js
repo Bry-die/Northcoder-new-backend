@@ -22,3 +22,17 @@ exports.getArticlesBySlug = (req, res, next) => {
     })
     .catch(next);
 };
+
+exports.postTopic = (req, res, next) => {
+  const { slug, description } = req.body;
+  db('topics')
+    .insert({
+      slug,
+      description,
+    })
+    .returning('*')
+    .then(([topic]) => {
+      res.status(201).send({ topic });
+    })
+    .catch(next);
+};
