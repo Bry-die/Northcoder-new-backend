@@ -1,6 +1,18 @@
 const topicsRouter = require('express').Router();
-const { getTopics } = require('../controllers/topics_controller');
+const { getTopics, getArticlesBySlug } = require('../controllers/topics_controller');
+const { handle405, handle400 } = require('../errors');
 
-topicsRouter.get('/', getTopics);
+topicsRouter.route('/')
+  .get(getTopics)
+  .all(handle405);
+
+topicsRouter.param('topic', (req, res, next, topic) => {
+  if (/^[a-z]+$/gi.test(topic)) next();
+  else next({ status: 400, msg: 'bad request malformed param...' });
+});
+
+topicsRouter.route('/:topic/articles')
+  .get(getArticlesBySlug)
+  .all(handle405);
 
 module.exports = { topicsRouter }
