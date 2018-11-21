@@ -1,5 +1,4 @@
 const db = require('../db/connection');
-const { handle404 } = ('../errors');
 
 exports.getTopics = (req, res, next) => {
   db('topics')
@@ -11,13 +10,16 @@ exports.getTopics = (req, res, next) => {
 exports.getArticlesBySlug = (req, res, next) => {
   const { topic } = req.params;
   db('articles')
-    .join('users', 'articles.user_id', 'users.user_id')
+    .select('users.username AS author', 'articles.title', 'articles.article_id', 'articles.votes', 'articles.created_at', 'articles.topic')
     .join('comments', 'articles.article_id', 'comments.article_id')
-    .select()
+    .join('users', 'articles.user_id', 'users.user_id')
     .where('topic', '=', topic)
+    .groupBy('articles.article_id', 'users.username')
+    .count('comment_id as comment_count')
     .then(articles => {
-      if (articles.length === 0) next({ status: 404, msg: 'no data for this endpoint...' }); 
-      else res.send({ articles })
+      console.log(articles.length)
+      if (articles.length === 0) next({ status: 404, msg: 'no data for this endpoint...' });
+      else res.send({ articles });
     })
     .catch(next);
 };
