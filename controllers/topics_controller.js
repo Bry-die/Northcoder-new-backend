@@ -16,8 +16,7 @@ exports.getArticlesBySlug = (req, res, next) => {
     .where('topic', '=', topic)
     .groupBy('articles.article_id', 'users.username')
     .count('comment_id as comment_count')
-    .then(articles => {
-      console.log(articles.length)
+    .then((articles) => {
       if (articles.length === 0) next({ status: 404, msg: 'no data for this endpoint...' });
       else res.send({ articles });
     })

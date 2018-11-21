@@ -1,20 +1,20 @@
-const { articleData, userData, commentData, topicData } = require('../db/data/');
+const {
+  articleData, userData, commentData, topicData,
+} = require('../db/data/');
 const { createRef, formatArticle, formatComments } = require('../db/utils');
 
 
-exports.seed = function(knex, Promise) {
+exports.seed = function (knex, Promise) {
   return knex('topics').insert(topicData)
-    .then(() => {
-      return knex('users').insert(userData).returning('*');
-    })
-    .then(usersRows => {
+    .then(() => knex('users').insert(userData).returning('*'))
+    .then((usersRows) => {
       const usersRef = createRef(usersRows, 'username', 'user_id');
       const formattedArticles = formatArticle(articleData, usersRef);
       return knex('articles').insert(formattedArticles).returning('*');
     })
-    .then(articleRows => {
+    .then((articleRows) => {
       const articleRef = createRef(articleRows, 'title', 'article_id');
-      let format = formatComments(commentData, articleRef);
+      const format = formatComments(commentData, articleRef);
       return knex('comments').insert(format);
     });
 };

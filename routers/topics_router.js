@@ -15,4 +15,4 @@ topicsRouter.route('/:topic/articles')
   .get(getArticlesBySlug)
   .all(handle405);
 
-module.exports = { topicsRouter }
+module.exports = { topicsRouter };
