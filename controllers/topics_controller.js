@@ -48,3 +48,22 @@ exports.postTopic = (req, res, next) => {
     })
     .catch(next);
 };
+
+exports.postArticleByTopic = (req, res, next) => {
+  const { title, body, user_id } = req.body;
+  const { topic } = req.params;
+  const created_at = new Date(Date.now());
+  db('articles')
+    .insert({
+      title,
+      body,
+      user_id,
+      topic,
+      created_at,
+    })
+    .returning('*')
+    .then(([article]) => {
+      res.status(201).send({ article });
+    })
+    .catch(next);
+};

@@ -108,9 +108,11 @@ describe('/', () => {
           it('POST adds a new article with title, body and user_id', () => request
             .post(url1)
             .send({ title: 'having fun!', body: 'this is a body', user_id: 1 })
-            .then(({ body }) => {
-              expect(body).to.be.an('Object');
-              expect(body).to.have.all.keys(['title', 'body', 'user_id', 'article_id', 'topic', 'created_at']);
+            .expect(201)
+            .then(({ body: { article } }) => {
+              expect(article).to.be.an('Object');
+              expect(article).to.have.all.keys(['title', 'body', 'user_id', 'article_id', 'topic', 'created_at', 'votes']);
+              expect(article.article_id).to.equal(13);
             }));
         });
       });

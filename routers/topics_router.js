@@ -1,5 +1,10 @@
 const topicsRouter = require('express').Router();
-const { getTopics, getArticlesBySlug, postTopic } = require('../controllers/topics_controller');
+const {
+  getTopics,
+  getArticlesBySlug,
+  postTopic,
+  postArticleByTopic,
+} = require('../controllers/topics_controller');
 const { handle405 } = require('../utils');
 
 topicsRouter.route('/')
@@ -9,6 +14,7 @@ topicsRouter.route('/')
 
 topicsRouter.route('/:topic/articles')
   .get(getArticlesBySlug)
+  .post(postArticleByTopic)
   .all(handle405);
 
 module.exports = { topicsRouter };
