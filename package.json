@@ -14,7 +14,7 @@
     "posttest": "npm run lint",
     "create-db": "psql -f ./db/setup.sql",
     "knex:init": "knex init",
-    "dev": "node listen.js"
+    "start": "node listen.js"
   },
   "repository": {
     "type": "git",
