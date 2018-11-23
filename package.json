@@ -4,6 +4,9 @@
   "description": "## Northcoders News API",
   "main": "index.js",
   "scripts": {
+    "seed:prod": "DB_URL=$(heroku config:get DATABASE_URL) knex seed:run --env production",
+    "migrate:latest:prod": "DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest --env production",
+    "migrate:rollback:prod": "DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback --env production",
     "test": "mocha ./spec/app.spec.js",
     "lint:fix": "eslint ./ --fix",
     "lint": "eslint ./",
@@ -11,7 +14,7 @@
     "posttest": "npm run lint",
     "create-db": "psql -f ./db/setup.sql",
     "knex:init": "knex init",
-    "dev": "nodemon listen.js"
+    "dev": "node listen.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +32,7 @@
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.14.0",
     "express": "^4.16.4",
+    "heroku": "^7.18.9",
     "knex": "^0.15.2",
     "pg": "^7.6.1"
   },

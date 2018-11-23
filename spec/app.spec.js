@@ -275,11 +275,11 @@ describe('/', () => {
               expect(comment).to.have.all.keys(['comment_id', 'body', 'user_id', 'article_id', 'created_at', 'votes']);
               expect(comment.comment_id).to.equal(19);
             }));
-          it('POST, responds with a 400 status and malformed body message when not in the correct format', () => request
-            .patch(url4)
+          it('POST, responds with a 400 status and violating non-null contraint', () => request
+            .post(url4)
             .expect(400)
             .then(({ body }) => {
-              expect(body.msg).to.equal('bad request malformed body...');
+              expect(body.msg).to.equal('violating not-null constraint...');
             }));
           it('all incorrect methods respond with a 405', () => {
             const invalid = ['put', 'delete', 'patch'];

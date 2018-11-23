@@ -1,7 +1,8 @@
 
 exports.handle404 = (err, req, res, next) => {
   if (err.msg === 'no data for this endpoint...') res.status(404).send({ msg: err.msg });
-  if (err.status === 404) res.status(404).send({ msg: 'page not found...' });
+  else if (err.status === 404) res.status(404).send({ msg: 'page not found...' });
+  else if (err.code === '23503') res.status(404).send({ msg: 'no data for this endpoint' });
   else next(err);
 };
 
