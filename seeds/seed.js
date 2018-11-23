@@ -10,11 +10,12 @@ exports.seed = function (knex, Promise) {
     .then((usersRows) => {
       const usersRef = createRef(usersRows, 'username', 'user_id');
       const formattedArticles = formatArticle(articleData, usersRef);
-      return knex('articles').insert(formattedArticles).returning('*');
+      return Promise.all([knex('articles').insert(formattedArticles).returning('*'), usersRows]);
     })
-    .then((articleRows) => {
+    .then(([articleRows, usersRows]) => {
       const articleRef = createRef(articleRows, 'title', 'article_id');
-      const format = formatComments(commentData, articleRef);
+      const usersRef = createRef(usersRows, 'username', 'user_id');
+      const format = formatComments(commentData, articleRef, usersRef);
       return knex('comments').insert(format);
     });
 };

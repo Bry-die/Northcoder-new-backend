@@ -114,6 +114,10 @@ describe('/', () => {
               expect(article).to.have.all.keys(['title', 'body', 'user_id', 'article_id', 'topic', 'created_at', 'votes']);
               expect(article.article_id).to.equal(13);
             }));
+          it('all incorrect methods respond with a 405', () => {
+            const invalid = ['delete', 'put', 'patch'];
+            return Promise.all(invalid.map(method => request[method](url1).expect(405)));
+          });
         });
       });
     });
@@ -127,6 +131,170 @@ describe('/', () => {
           expect(articles.length).to.equal(10);
           expect(articles[0]).to.have.all.keys(['author', 'title', 'article_id', 'votes', 'comment_count', 'created_at', 'topic']);
         }));
+      it('"limit" is a query which dictates the number of results and is defaulted to 10', () => request
+        .get('/api/articles?limit=5')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).to.equal(5);
+        }));
+      it('"sort_by" is a query which determines the sort_criteria defaults to date', () => request
+        .get(url2)
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles[0].created_at).to.equal('2018-11-15T00:00:00.000Z');
+        }));
+      it('"p" is a query which determines what page you are on', () => request
+        .get('/api/articles?p=2')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles.length).to.equal(2);
+        }));
+      it('"sort_ascending" is a bool which changes the sort order defaults to false', () => request
+        .get('/api/articles?sort_ascending=true')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles[0].created_at).to.equal('1969-12-31T23:00:00.000Z');
+        }));
+      it('all incorrect methods respond with a 405', () => {
+        const invalid = ['delete', 'put', 'patch', 'post'];
+        return Promise.all(invalid.map(method => request[method](url2).expect(405)));
+      });
+      describe('/:article_id', () => {
+        const url3 = '/api/articles/1';
+        it('GET returns a status 200 and returns an specific artical based on the id', () => request
+          .get('/api/articles/1')
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article).to.be.an('Object');
+            expect(article).have.all.keys(['article_id', 'title', 'author', 'votes', 'comment_count', 'created_at', 'topic']);
+            expect(article.article_id).to.equal(1);
+          }));
+        it('GET, if parametric is valid but doesn\'t exist return 404 and appropriate msg', () => request
+          .get('/api/articles/1234567')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('no data for this endpoint...');
+          }));
+        it('if the param is not valid responds with a 400 and an error message', () => request
+          .get('/api/articles/banana')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('bad request, malformed param...');
+          }));
+        it('PATCH respondes with status 201 and increases the votes of the artcile', () => request
+          .patch('/api/articles/1')
+          .send({ inc_votes: 1000 })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).to.be.an('Object');
+            expect(article.votes).to.equal(1100);
+          }));
+        it('PATCH respondes with status 201 and decreases the votes of the artcile', () => request
+          .patch('/api/articles/1')
+          .send({ inc_votes: -100 })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article).to.be.an('Object');
+            expect(article.votes).to.equal(0);
+          }));
+        it('responds with a 400 status and malformed body message when not in the correct format', () => request
+          .patch('/api/articles/1')
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('bad request malformed body...');
+          }));
+        it('PATCH, if parametric is valid but doesn\'t exist return 404 and appropriate msg', () => request
+          .patch('/api/articles/1234567890')
+          .send({ inc_votes: 100 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('no data for this endpoint...');
+          }));
+        it('DELETE \'s the article and responds with an empty object', () => request
+          .delete('/api/articles/1')
+          .expect(202)
+          .then(({ body }) => {
+            expect(body).to.be.an('Object');
+            expect(body).to.eql({});
+          }));
+        it('all incorrect methods respond with a 405', () => {
+          const invalid = ['put', 'post'];
+          return Promise.all(invalid.map(method => request[method](url3).expect(405)));
+        });
+        describe('/comments', () => {
+          const url4 = '/api/articles/1/comments';
+          it('GET returns a status 200 and responds with an array of comment objects', () => request
+            .get(url4)
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments).to.be.an('Array');
+              expect(comments[0]).to.have.all.keys(['comment_id', 'votes', 'created_at', 'author', 'body']);
+            }));
+          it('"limit" is a query which dictates the number of results and is defaulted to 10', () => request
+            .get('/api/articles/1/comments?limit=5')
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments.length).to.equal(5);
+            }));
+          it('"sort_by" is a query which determines the sort_criteria defaults to date', () => request
+            .get(url4)
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments[0].created_at).to.equal('2017-08-04T23:00:00.000Z');
+            }));
+          it('"p" is a query which determines what page you are on', () => request
+            .get('/api/articles/1/comments?p=2')
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments.length).to.equal(3);
+            }));
+          it('"sort_ascending" is a bool which changes the sort order defaults to false', () => request
+            .get('/api/articles/1/comments?sort_ascending=true')
+            .expect(200)
+            .then(({ body: { comments } }) => {
+              expect(comments[0].created_at).to.equal('2016-02-08T00:00:00.000Z');
+            }));
+          it('GET, if parametric is valid but doesn\'t exist return 404 and appropriate msg', () => request
+            .get('/api/articles/1234567890/comments')
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal('no data for this endpoint...');
+            }));
+          it('POST adds a new comment, body and user_id to the correct article', () => request
+            .post(url4)
+            .send({ body: 'love me some comments', user_id: 1 })
+            .expect(201)
+            .then(({ body: { comment } }) => {
+              expect(comment).to.be.an('Object');
+              expect(comment).to.have.all.keys(['comment_id', 'body', 'user_id', 'article_id', 'created_at', 'votes']);
+              expect(comment.comment_id).to.equal(19);
+            }));
+          it('all incorrect methods respond with a 405', () => {
+            const invalid = ['put', 'post'];
+            return Promise.all(invalid.map(method => request[method](url3).expect(405)));
+          });
+        });
+      });
+    });
+    describe('/comments', () => {
+      describe('/:comment_id', () => {
+        it('PATCH respondes with status 201 and increases the votes of the comment', () => request
+          .patch('/api/comments/1')
+          .send({ inc_votes: 1000 })
+          .expect(201)
+          .then(({ body: { comment } }) => {
+            expect(comment).to.be.an('Object');
+            expect(comment.votes).to.equal(1100);
+          }));
+        it('PATCH respondes with status 201 and decreases the votes of the comment', () => request
+          .patch('/api/comments/1')
+          .send({ inc_votes: -1000 })
+          .expect(201)
+          .then(({ body: { comment } }) => {
+            expect(comment).to.be.an('Object');
+            expect(comment.votes).to.equal(-900);
+          }));
+      });
     });
   });
 });

@@ -8,7 +8,7 @@ exports.createRef = (rows, colName, idName) => rows.reduce((refObj, row) => {
 
 exports.formatArticle = (artData, usersRef) => artData.map((artDatum) => {
   const {
-    title, topic, created_by, body, created_at,
+    title, topic, created_by, body, created_at, votes,
   } = artDatum;
   const time = new Date(created_at);
   return {
@@ -17,26 +17,19 @@ exports.formatArticle = (artData, usersRef) => artData.map((artDatum) => {
     user_id: usersRef[created_by],
     body,
     created_at: time,
+    votes,
   };
 });
 
-exports.formatComments = (comData, ref) => comData.map((comDatum) => {
+exports.formatComments = (comData, artRef, usersRef) => comData.map((comDatum) => {
   const {
     body, belongs_to, created_by, votes, created_at,
   } = comDatum;
   const time = new Date(created_at);
-  if (ref[belongs_to]) {
-    return {
-      body,
-      article_id: ref[belongs_to],
-      user_id: undefined,
-      votes,
-      created_at: time,
-    };
-  }
   return {
     body,
-    user_id: ref[created_by],
+    article_id: artRef[belongs_to],
+    user_id: usersRef[created_by],
     votes,
     created_at: time,
   };

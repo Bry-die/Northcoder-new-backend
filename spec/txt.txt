@@ -1,0 +1,6 @@
+        // it('DELETE, if parametric is valid but doesn\'t exist return 404 and appropriate msg', () => request
+        //   .delete('/api/articles/1234567890')
+        //   .expect(404)
+        //   .then(({ body }) => {
+        //     expect(body.msg).to.equal('no data for this endpoint...');
+        //   }));
