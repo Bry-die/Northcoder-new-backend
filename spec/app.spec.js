@@ -13,6 +13,12 @@ describe('/', () => {
     .then(() => db.seed.run()));
   after(() => db.destroy());
   describe('/api', () => {
+    it('responds with a status 200', () => request
+      .get('/api')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).to.be.an('Object');
+      }));
     describe('404', () => {
       it('returns a 404 and an appropriate error message', () => request
         .get('/api/bananas')
@@ -269,17 +275,24 @@ describe('/', () => {
               expect(comment).to.have.all.keys(['comment_id', 'body', 'user_id', 'article_id', 'created_at', 'votes']);
               expect(comment.comment_id).to.equal(19);
             }));
+          it('POST, responds with a 400 status and malformed body message when not in the correct format', () => request
+            .patch(url4)
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal('bad request malformed body...');
+            }));
           it('all incorrect methods respond with a 405', () => {
-            const invalid = ['put', 'post'];
-            return Promise.all(invalid.map(method => request[method](url3).expect(405)));
+            const invalid = ['put', 'delete', 'patch'];
+            return Promise.all(invalid.map(method => request[method](url4).expect(405)));
           });
         });
       });
     });
     describe('/comments', () => {
       describe('/:comment_id', () => {
+        const url5 = '/api/comments/1';
         it('PATCH respondes with status 201 and increases the votes of the comment', () => request
-          .patch('/api/comments/1')
+          .patch(url5)
           .send({ inc_votes: 1000 })
           .expect(201)
           .then(({ body: { comment } }) => {
@@ -287,13 +300,68 @@ describe('/', () => {
             expect(comment.votes).to.equal(1100);
           }));
         it('PATCH respondes with status 201 and decreases the votes of the comment', () => request
-          .patch('/api/comments/1')
+          .patch(url5)
           .send({ inc_votes: -1000 })
           .expect(201)
           .then(({ body: { comment } }) => {
             expect(comment).to.be.an('Object');
             expect(comment.votes).to.equal(-900);
           }));
+        it('PATCH, if parametric is valid but doesn\'t exist return 404 and appropriate msg', () => request
+          .patch('/api/comments/1234567890')
+          .send({ inc_votes: 100 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('no data for this endpoint...');
+          }));
+        it('DELETE \'s the comment and responds with an empty object', () => request
+          .delete(url5)
+          .expect(202)
+          .then(({ body }) => {
+            expect(body).to.be.an('Object');
+            expect(body).to.eql({});
+          }));
+        it('all incorrect methods respond with a 405', () => {
+          const invalid = ['put', 'get', 'post'];
+          return Promise.all(invalid.map(method => request[method](url5).expect(405)));
+        });
+      });
+    });
+    describe('/users', () => {
+      const url6 = '/api/users';
+      it('GET returns a status 200 and an array of user objects', () => request
+        .get(url6)
+        .expect(200)
+        .then(({ body: { users } }) => {
+          expect(users).to.be.an('Array');
+          expect(users.length).to.equal(3);
+          expect(users[0]).to.have.all.keys(['user_id', 'username', 'avatar_url', 'name']);
+          expect(users[0].user_id).to.equal(1);
+        }));
+      it('all incorrect methods respond with a 405', () => {
+        const invalid = ['put', 'patch', 'post', 'delete'];
+        return Promise.all(invalid.map(method => request[method](url6).expect(405)));
+      });
+      describe('/:user_id', () => {
+        const url7 = '/api/users/1';
+        it('GET returns a status 200 and a single user object', () => request
+          .get(url7)
+          .expect(200)
+          .then(({ body: { user } }) => {
+            expect(user).to.be.an('Object');
+            expect(user).to.have.all.keys(['user_id', 'username', 'avatar_url', 'name']);
+            expect(user.user_id).to.equal(1);
+          }));
+        it('GET, if parametric is valid but doesn\'t exist return 404 and appropriate msg', () => request
+          .get('/api/users/1234567890')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('no data for this endpoint...');
+          }));
+        it('all incorrect methods respond with a 405', () => {
+          const invalid = ['put', 'patch', 'post', 'delete'];
+          return Promise.all(invalid.map(method => request[method](url7).expect(405)));
+        });
       });
     });
   });
