@@ -120,6 +120,17 @@ describe('/', () => {
               expect(article).to.have.all.keys(['title', 'body', 'user_id', 'article_id', 'topic', 'created_at', 'votes']);
               expect(article.article_id).to.equal(13);
             }));
+          it('POST, responds with a status 400 if not in the correct format', () => request
+            .post(url1)
+            .send({ ahh: 'asd' })
+            .expect(400));
+          it('POST, response with a 400 if violating non-null constraint', () => request
+            .post(url1)
+            .send({ title: 'yo', body: 'yoyo' })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal('violating not-null constraint...');
+            }));
           it('all incorrect methods respond with a 405', () => {
             const invalid = ['delete', 'put', 'patch'];
             return Promise.all(invalid.map(method => request[method](url1).expect(405)));
@@ -187,7 +198,7 @@ describe('/', () => {
           .then(({ body }) => {
             expect(body.msg).to.equal('bad request, malformed param...');
           }));
-        it('PATCH respondes with status 201 and increases the votes of the artcile', () => request
+        it('PATCH respondes with status 201 and increases the votes of the article', () => request
           .patch('/api/articles/1')
           .send({ inc_votes: 1000 })
           .expect(201)
@@ -222,6 +233,12 @@ describe('/', () => {
           .then(({ body }) => {
             expect(body).to.be.an('Object');
             expect(body).to.eql({});
+          }));
+        it('DELETE, if parametric is valid but doesn\'t exist return 404 and appropriate msg', () => request
+          .delete('/api/articles/1234567890')
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal('no data for this endpoint...');
           }));
         it('all incorrect methods respond with a 405', () => {
           const invalid = ['put', 'post'];
