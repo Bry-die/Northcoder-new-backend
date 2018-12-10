@@ -1,15 +1,22 @@
 const db = require('../db/connection');
 
 exports.getArticles = (req, res, next) => {
-  const {
-    limit = 10,
+  const { limit = 10, p = 1, sort_ascending = false } = req.query;
+  let {
     sort_by = 'created_at',
-    p = 1,
-    sort_ascending = false,
   } = req.query;
   const offset = (p - 1) * limit;
   let order = 'desc';
   if (sort_ascending) order = 'asc';
+  const columns = ['author', 'title', 'article_id', 'votes', 'created_at', 'topic', 'comment_count'];
+  let count = 0;
+  columns.forEach((column) => {
+    if (sort_by === column) count += 1;
+  });
+  if (count === 0) sort_by = 'created_at';
+  if (sort_ascending) order = 'asc';
+  if (isNaN(limit)) next({ code: 'AAA' });
+  if (isNaN(p)) next({ code: 'AAA' });
   db('articles')
     .select('users.username AS author', 'articles.title', 'articles.article_id', 'articles.votes', 'articles.created_at', 'articles.topic')
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
@@ -53,8 +60,9 @@ exports.updateVotes = (req, res, next) => {
     .increment('votes', int)
     .returning('*')
     .then(([article]) => {
+      console.log({ article });
       if (article === undefined) next({ status: 404, msg: 'no data for this endpoint...' });
-      else res.status(201).send({ article });
+      else res.status(200).send({ article });
     })
     .catch(next);
 };
@@ -65,8 +73,10 @@ exports.deleteArticle = (req, res, next) => {
     .select()
     .del()
     .where('article_id', '=', article_id)
-    .then(() => {
-      res.status(202).send({});
+    .returning('*')
+    .then((article) => {
+      if (article.length === 0) next({ status: 404, msg: 'no data for this endpoint...' });
+      res.status(204).send({});
     })
     .catch(next);
 };
@@ -101,6 +111,7 @@ exports.postCommentByArticleId = (req, res, next) => {
   const { body, user_id } = req.body;
   const { article_id } = req.params;
   const created_at = new Date(Date.now());
+  if (user_id === undefined) next({ code: 'AAA' });
   db('comments')
     .insert({
       article_id,
@@ -112,5 +123,7 @@ exports.postCommentByArticleId = (req, res, next) => {
     .then(([comment]) => {
       res.status(201).send({ comment });
     })
-    .catch(next);
+    .catch((err) => {
+      next({ code: 'AAA' });
+    });
 };

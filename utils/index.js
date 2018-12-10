@@ -4,6 +4,14 @@ exports.checkParam = (req, res, next, endpoint) => {
   else next({ code: '22P02' });
 };
 
+exports.validateQuery = (rawQueries, ...validQueries) => {
+  return validQueries.reduce((valid, query) => {
+    if (rawQueries[query]) valid[query] = rawQueries[query];
+    return valid;
+  }, {});
+};
+
+
 exports.handle405 = (req, res, next) => {
   res.status(405).send({ msg: 'method not allowed...' });
 };

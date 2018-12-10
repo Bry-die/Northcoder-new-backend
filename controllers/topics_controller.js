@@ -9,15 +9,21 @@ exports.getTopics = (req, res, next) => {
 
 exports.getArticlesBySlug = (req, res, next) => {
   const { topic } = req.params;
-  const {
-    limit = 10,
+  const { limit = 10, p = 1, sort_ascending = false } = req.query;
+  let {
     sort_by = 'created_at',
-    p = 1,
-    sort_ascending = false,
   } = req.query;
   const offset = (p - 1) * limit;
   let order = 'desc';
+  const columns = ['author', 'title', 'article_id', 'votes', 'created_at', 'topic', 'comment_count'];
+  let count = 0;
+  columns.forEach((column) => {
+    if (sort_by === column) count += 1;
+  });
+  if (count === 0) sort_by = 'created_at';
   if (sort_ascending) order = 'asc';
+  if (isNaN(limit)) next({ code: 'AAA' });
+  if (isNaN(p)) next({ code: 'AAA' });
   db('articles')
     .select('users.username AS author', 'articles.title', 'articles.article_id', 'articles.votes', 'articles.created_at', 'articles.topic')
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
