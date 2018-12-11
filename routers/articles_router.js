@@ -1,5 +1,7 @@
 const articlesRouter = require('express').Router();
 const { handle405, checkParam } = require('../utils');
+const { commentsRouter } = require('./comments_router');
+
 const {
   getArticles,
   getArticlesById,
@@ -27,5 +29,7 @@ articlesRouter.route('/:article_id/comments')
   .get(getCommentsByArticleId)
   .post(postCommentByArticleId)
   .all(handle405);
+
+articlesRouter.use('/:article_id/comments/comment_id', commentsRouter);
 
 module.exports = { articlesRouter };

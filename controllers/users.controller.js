@@ -17,5 +17,6 @@ exports.getUserById = (req, res, next) => {
     .then(([user]) => {
       if (user === undefined) next({ status: 404, msg: 'no data for this endpoint...' });
       else res.send({ user });
-    });
+    })
+    .catch(next);
 };
