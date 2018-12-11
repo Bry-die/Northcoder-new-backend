@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "## Northcoders News API",
   "main": "index.js",
+  "engines": {
+    "node": "10.10.0"
+  },
   "scripts": {
     "seed:prod": "DATABASE_URL=$(heroku config:get DATABASE_URL) knex seed:run --env production",
     "migrate:latest:prod": "DATABASE_URL=$(heroku config:get DATABASE_URL) knex migrate:latest --env production",
@@ -41,7 +44,6 @@
     "eslint": "^5.9.0",
     "husky": "^1.1.4",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.6",
     "supertest": "^3.3.0"
   }
 }
